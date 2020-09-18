@@ -19,8 +19,8 @@ type gateway struct {
 }
 
 // New creates a new database gateway
-func New(connInfo ConnInfo) (Gateway, error) {
-	db, err := sql.Open("postgres", connInfo.String())
+func New(driver string, connection string) (Gateway, error) {
+	db, err := sql.Open(driver, connection)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to connect to database")
 	}

@@ -1,4 +1,4 @@
-module github.com/nickgarfield/pgdb
+module github.com/nickgarfield/sqldb
 
 go 1.14
 
