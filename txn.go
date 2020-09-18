@@ -17,7 +17,7 @@ type Writable interface {
 
 // Txn provides an interface for database transactions
 type Txn interface {
-	Insert(ctx context.Context, item Writable) error
+	Insert(ctx context.Context, item Writable, clause string) error
 	Rollback() error
 	Commit() error
 }
@@ -27,7 +27,7 @@ type txn struct {
 }
 
 // Insert appends an SQL INSERT command for a writeable value to a database transaction
-func (txn *txn) Insert(ctx context.Context, item Writable) error {
+func (txn *txn) Insert(ctx context.Context, item Writable, clause string) error {
 
 	// Validate 'item' is a pointer to a struct
 	vItem, err := isStructPtr(item)
@@ -62,10 +62,11 @@ func (txn *txn) Insert(ctx context.Context, item Writable) error {
 	}
 
 	// Build and execute the command
-	cmd := fmt.Sprintf(`INSERT INTO %v (%v) VALUES (%v)`,
+	cmd := fmt.Sprintf(`INSERT INTO %v (%v) VALUES (%v) %v`,
 		item.DatabaseTable(),
 		strings.Join(fieldNames, ", "),
 		strings.Join(fieldPlaceholders, ", "),
+		clause,
 	)
 	_, err = txn.tx.ExecContext(ctx, cmd, fieldValues...)
 	if err != nil {
