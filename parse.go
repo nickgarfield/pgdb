@@ -2,12 +2,13 @@ package sqldb
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 
 	"github.com/lib/pq"
 )
 
-func parseRow(row *sql.Row, item interface{}) error {
+func (g *gateway) parseRow(row *sql.Row, item interface{}) error {
 
 	// Validate 'item' is a pointer to a struct
 	vItem, err := isStructPtr(item)
@@ -16,10 +17,10 @@ func parseRow(row *sql.Row, item interface{}) error {
 	}
 
 	// Scan the SQL row into the item
-	return scan(row, vItem)
+	return g.scan(row, vItem)
 }
 
-func parseRows(rows *sql.Rows, list interface{}) error {
+func (g *gateway) parseRows(rows *sql.Rows, list interface{}) error {
 
 	// Validate 'list' is a pointer to a slice
 	vList, err := isSlicePtr(list)
@@ -37,7 +38,7 @@ func parseRows(rows *sql.Rows, list interface{}) error {
 		vItemPtr := reflect.New(tItem)
 
 		// Scan the SQL row into the item
-		if err := scan(rows, vItemPtr.Elem()); err != nil {
+		if err := g.scan(rows, vItemPtr.Elem()); err != nil {
 			return err
 		}
 
@@ -52,26 +53,21 @@ type scannable interface {
 	Scan(dest ...interface{}) error
 }
 
-func scan(s scannable, vItem reflect.Value) error {
+func (g *gateway) scan(s scannable, vItem reflect.Value) error {
 
 	// Create slice of pointers
 	// Each pointer's value type matches a field type of the struct being written to
 	ptrs := make([]interface{}, vItem.NumField())
-	pqWrappedPtrs := make([]interface{}, vItem.NumField())
+	driverPtrs := make([]interface{}, vItem.NumField())
 	for i := 0; i < vItem.NumField(); i++ {
 		vField := vItem.Field(i)
 		ptr := reflect.New(vField.Type()).Interface()
 		ptrs[i] = ptr
-		switch vField.Kind() {
-		case reflect.Slice:
-			pqWrappedPtrs[i] = pq.Array(ptr)
-		default:
-			pqWrappedPtrs[i] = ptr
-		}
+		driverPtrs[i] = driverCast(ptr, vField, g.driver)
 	}
 
 	// Scan row in the pointer values
-	if err := s.Scan(pqWrappedPtrs...); err != nil {
+	if err := s.Scan(driverPtrs...); err != nil {
 		return err
 	}
 
@@ -81,4 +77,29 @@ func scan(s scannable, vItem reflect.Value) error {
 	}
 
 	return nil
+}
+
+func driverCast(ptr interface{}, v reflect.Value, driver string) interface{} {
+	switch driver {
+	case "postgres":
+		return postgresCast(ptr, v)
+	case "sqlite3":
+		return sqliteCast(ptr, v)
+	default:
+		panic(fmt.Errorf("Driver '%v' unsupported", driver))
+	}
+}
+
+func postgresCast(ptr interface{}, v reflect.Value) interface{} {
+	switch v.Kind() {
+	case reflect.Slice:
+		return pq.Array(ptr)
+
+	default:
+		return ptr
+	}
+}
+
+func sqliteCast(ptr interface{}, v reflect.Value) interface{} {
+	return ptr
 }

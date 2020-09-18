@@ -15,5 +15,5 @@ func (g *gateway) QueryList(ctx context.Context, list interface{}, qry string, a
 		return err
 	}
 	defer rows.Close()
-	return parseRows(rows, list)
+	return g.parseRows(rows, list)
 }
