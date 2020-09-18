@@ -19,7 +19,7 @@ type gateway struct {
 }
 
 // New creates a new database gateway
-func New(ctx context.Context, connInfo ConnInfo) (Gateway, error) {
+func New(connInfo ConnInfo) (Gateway, error) {
 	db, err := sql.Open("postgres", connInfo.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to connect to database")
