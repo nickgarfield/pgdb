@@ -1,4 +1,4 @@
-module github.com/nickgarfield/bbpoll
+module github.com/nickgarfield/pgdb
 
 go 1.14
 
