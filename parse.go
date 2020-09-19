@@ -93,12 +93,7 @@ func driverCast(ptr interface{}, v reflect.Value, driver string) interface{} {
 func postgresCast(ptr interface{}, v reflect.Value) interface{} {
 	switch v.Kind() {
 	case reflect.Slice:
-		switch v.Type().Name() {
-		case "[]byte":
-			return ptr
-		default:
-			return pq.Array(ptr)
-		}
+		return pq.Array(ptr)
 
 	default:
 		return ptr
