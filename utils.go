@@ -7,8 +7,8 @@ import (
 	"reflect"
 )
 
-// TenantID is the TENANT_ID key in the Go context
-const TenantID = "TENANT_ID"
+// TenantID is the X-Tenant key in the Go context
+const TenantID = "X-Tenant"
 
 // connect opens a new database connection with tenant isolation
 func (g *gateway) connect(ctx context.Context) (*sql.Conn, error) {
