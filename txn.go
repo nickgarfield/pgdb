@@ -2,11 +2,11 @@ package sqldb
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
 
@@ -23,7 +23,7 @@ type Txn interface {
 }
 
 type txn struct {
-	tx *sql.Tx
+	tx *sqlx.Tx
 }
 
 // Insert appends an SQL INSERT command for a writeable value to a database transaction

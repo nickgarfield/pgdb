@@ -10,6 +10,6 @@ func (g *gateway) QueryItem(ctx context.Context, item interface{}, qry string, a
 	if err != nil {
 		return err
 	}
-	row := conn.QueryRowContext(ctx, qry, args...)
-	return g.parseRow(row, item)
+	rows, err := conn.QueryContext(ctx, qry, args...)
+	return g.parseRow(rows, item)
 }

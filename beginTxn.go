@@ -7,7 +7,7 @@ import (
 
 // BeginTxn begins a new database transaction
 func (g *gateway) BeginTxn(ctx context.Context) (Txn, error) {
-	tx, err := g.db.BeginTx(ctx, nil)
+	tx, err := g.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}

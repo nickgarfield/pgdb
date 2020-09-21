@@ -2,8 +2,8 @@ package sqldb
 
 import (
 	"context"
-	"database/sql"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
@@ -15,13 +15,13 @@ type Gateway interface {
 }
 
 type gateway struct {
-	db     *sql.DB
+	db     *sqlx.DB
 	driver string
 }
 
 // New creates a new database gateway
 func New(driver string, connection string) (Gateway, error) {
-	db, err := sql.Open(driver, connection)
+	db, err := sqlx.Open(driver, connection)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to connect to database")
 	}
