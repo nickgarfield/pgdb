@@ -22,12 +22,14 @@ func (g *gateway) QueryItem(ctx context.Context, item interface{}, qry string, a
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	// Query the rows
 	rows, err := conn.QueryContext(ctx, qry, args...)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	// Create a slice of the struct
 	vListPtr := reflect.New(reflect.SliceOf(vItem.Type()))

@@ -20,6 +20,7 @@ func (g *gateway) QueryList(ctx context.Context, list interface{}, qry string, a
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	// Execute the query
 	rows, err := conn.QueryContext(ctx, qry, args...)
