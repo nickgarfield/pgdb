@@ -2,6 +2,8 @@ package sqldb
 
 import (
 	"context"
+	"database/sql"
+	"reflect"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -10,7 +12,7 @@ import (
 func (g *gateway) QueryItem(ctx context.Context, item interface{}, qry string, args ...interface{}) error {
 
 	// Validate 'item' is a pointer to a struct
-	_, err := isStructPtr(item)
+	vItem, err := isStructPtr(item)
 	if err != nil {
 		return err
 	}
@@ -27,7 +29,18 @@ func (g *gateway) QueryItem(ctx context.Context, item interface{}, qry string, a
 		return err
 	}
 
-	// Scan row and return
-	rows.Next()
-	return sqlx.StructScan(rows, item)
+	// Create a slice of the struct
+	vListPtr := reflect.New(reflect.SliceOf(vItem.Type()))
+
+	// Scan rows
+	if err := sqlx.StructScan(rows, vListPtr.Interface()); err != nil {
+		return err
+	}
+
+	if vListPtr.Elem().Len() < 1 {
+		return sql.ErrNoRows
+	}
+
+	vItem.Set(vListPtr.Elem().Index(0))
+	return nil
 }
