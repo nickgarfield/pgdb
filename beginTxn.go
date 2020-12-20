@@ -18,6 +18,6 @@ func (g *gateway) BeginTxn(ctx context.Context) (Txn, error) {
 		}
 	}
 	return &txn{
-		tx: tx,
+		Tx: tx,
 	}, nil
 }
