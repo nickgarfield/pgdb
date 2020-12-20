@@ -12,7 +12,7 @@ const TenantID = "X-Tenant"
 
 // connect opens a new database connection with tenant isolation
 func (g *gateway) connect(ctx context.Context) (*sql.Conn, error) {
-	conn, err := g.db.Conn(ctx)
+	conn, err := g.DB.Conn(ctx)
 	if err != nil {
 		return nil, err
 	}

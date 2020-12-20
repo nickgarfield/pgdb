@@ -15,8 +15,8 @@ type Gateway interface {
 }
 
 type gateway struct {
-	db     *sqlx.DB
-	driver string
+	DB     *sqlx.DB
+	Driver string
 }
 
 // New creates a new database gateway
@@ -26,7 +26,7 @@ func New(driver string, connection string) (Gateway, error) {
 		return nil, errors.Wrap(err, "Failed to connect to database")
 	}
 	return &gateway{
-		db:     db,
-		driver: driver,
+		DB:     db,
+		Driver: driver,
 	}, err
 }
