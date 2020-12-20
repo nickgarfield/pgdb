@@ -20,10 +20,15 @@ type Txn interface {
 	Insert(ctx context.Context, item Writable, clause string) error
 	Rollback() error
 	Commit() error
+	Tx() *sqlx.Tx
 }
 
 type txn struct {
-	Tx *sqlx.Tx
+	tx *sqlx.Tx
+}
+
+func (txn *txn) Tx() *sqlx.Tx {
+	return txn.tx
 }
 
 // Insert appends an SQL INSERT command for a writeable value to a database transaction
@@ -68,7 +73,7 @@ func (txn *txn) Insert(ctx context.Context, item Writable, clause string) error 
 		strings.Join(fieldPlaceholders, ", "),
 		clause,
 	)
-	_, err = txn.Tx.ExecContext(ctx, cmd, fieldValues...)
+	_, err = txn.tx.ExecContext(ctx, cmd, fieldValues...)
 	if err != nil {
 		txn.Rollback()
 	}
@@ -77,10 +82,10 @@ func (txn *txn) Insert(ctx context.Context, item Writable, clause string) error 
 
 // Rollback rolls back a database transaction
 func (txn *txn) Rollback() error {
-	return txn.Tx.Rollback()
+	return txn.tx.Rollback()
 }
 
 // Commit commits a database transaction
 func (txn *txn) Commit() error {
-	return txn.Tx.Commit()
+	return txn.tx.Commit()
 }
